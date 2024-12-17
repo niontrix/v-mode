@@ -71,7 +71,7 @@
     ;; /* */ comments, which can be nested
     ;; (modify-syntax-entry ?* ". 23bn" table)
     ;; (modify-syntax-entry ?\n ">" table)
-       
+
     ;; uses // for comments
     (modify-syntax-entry ?/  ". 12" table)
     (modify-syntax-entry ?\n ">"    table)
@@ -280,9 +280,7 @@
         (setq foundp (file-exists-p filepath)))) ;
     foundp))
 
-(defun v-project-root
-  (&optional
-    path)
+(defun v-project-root (&optional path)
   "Return the root of the V project.
 Optional argument PATH ."
   (let* ((bufdir (if buffer-file-name   ;
@@ -308,10 +306,8 @@ Optional argument PATH ."
 (defun v-run-command (command &optional path)
   "Return `COMMAND' in the root of the V project.
 Optional argument PATH ."
-  (let ((oldir default-directory))
-    (setq default-directory (if path path (v-project-root path)))
-    (compile command)
-    (setq default-directory oldir)))
+  (let ((default-directory (if path path (v-project-root path))))
+    (compile command)))
 
 (defun v-project-build ()
   "Build project with v."
@@ -432,8 +428,9 @@ Optional argument PATH ."
           (v-executable                 ;
             (string-trim (shell-command-to-string (concat "readlink -f "
                                                     v-path))))
+          (vroot (getenv "VROOT"))
           (packages-path                ;
-            (concat (file-name-directory v-executable) "vlib"))
+            (concat (or vroot (file-name-directory v-executable)) "vlib"))
           (ctags-params                 ;
             (concat  "ctags --langdef=v --langmap=v:.v "
               "--regex-v='/[ \\t]*fn[ \\t]+(.*)[ \\t]+(.*)/\\2/f,function/' "
@@ -445,15 +442,11 @@ Optional argument PATH ."
                                         ;
               "-e -R . " packages-path)))
     (when (file-exists-p packages-path)
-      (let ((oldir default-directory))
-        (setq default-directory (v-project-root))
+      (let ((default-directory (v-project-root)))
         (message "ctags:%s" (shell-command-to-string ctags-params))
-        (v-load-tags)
-        (setq default-directory oldir)))))
+        (v-load-tags)))))
 
-(defun v-load-tags
-  (&optional
-    build)
+(defun v-load-tags (&optional build)
   "Visit tags table.
 Optional argument BUILD ."
   (interactive)
@@ -518,7 +511,7 @@ Optional argument BUILD ."
 
 ;;;###autoload
 (setq auto-mode-alist
-      (cons '("\\(\\.v?v\\|\\.vsh\\)$" . v-mode) auto-mode-alist))
+  (cons '("\\(\\.v?v\\|\\.vsh\\)$" . v-mode) auto-mode-alist))
 
 ;;
 (provide 'v-mode)

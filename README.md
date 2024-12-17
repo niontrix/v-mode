@@ -32,6 +32,11 @@ An Emacs major mode for the [V](https://vlang.io/) programming language.
 
 ## Installation
 
+### Dependencies
+For `v-build-tags` to work you need to have `exuberant-ctags` or `universal-ctags` installed.
+Also you should setup `$VROOT` in your environment so `v-mode` has an easier time to find the
+folder with the current `v` installation.
+
 ### Using MELPA
 This package can be obtain from
 [MELPA](http://melpa.org/#/v-mode) or
